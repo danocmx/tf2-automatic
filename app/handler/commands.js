@@ -154,7 +154,7 @@ function getItemFromParams (steamID, params) {
     }
 
     if (item.paintkit !== null) {
-        const paintkit = schemaManager.schema.getSkinByName(item.paintkit);
+        const paintkit = schemaManager.schema.getEffectIdByName(item.paintkit);
         if (paintkit === null) {
             client.chatMessage(steamID, 'Could not find a skin in the schema with the name "' + item.paintkit + '"');
             return null;
@@ -164,7 +164,7 @@ function getItemFromParams (steamID, params) {
     }
 
     if (item.effect !== null) {
-        const effect = schemaManager.schema.getEffectByName(item.effect);
+        const effect = schemaManager.schema.getEffectIdByName(item.effect);
 
         if (effect === null) {
             client.chatMessage(steamID, 'Could not find an unusual effect in the schema with the name "' + item.paintkit + '"');
