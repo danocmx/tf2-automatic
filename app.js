@@ -46,13 +46,15 @@ require('death')({ uncaughtException: true })(function (signal, err) {
         }
 
         log.error([
-            package.name + ' crashed! Please create an issue with the following log:',
+            package.name + (!handler.isReady() ? ' failed to start properly, this is most likely a temporary error. See the log:' : ' crashed! Please create an issue with the following log:'),
             `package.version: ${package.version || undefined}; node: ${process.version} ${process.platform} ${process.arch}}`,
             'Stack trace:',
             require('util').inspect(err)
         ].join('\r\n'));
 
-        log.error('Create an issue here: https://github.com/Nicklason/tf2-automatic/issues/new?template=bug_report.md');
+        if (handler.isReady()) {
+            log.error('Create an issue here: https://github.com/Nicklason/tf2-automatic/issues/new?template=bug_report.md');
+        }
     }
 
     if (!crashed) {
@@ -83,6 +85,7 @@ const pm2 = require('pm2');
 
 const client = require('lib/client');
 const manager = require('lib/manager');
+const community = require('lib/community');
 
 const schemaManager = require('lib/tf2-schema');
 const listingManager = require('lib/bptf-listings');
@@ -177,6 +180,18 @@ pm2.connect(function (err) {
                                     listings: function (callback) {
                                         // Initialize bptf-listings
                                         listingManager.init(callback);
+                                    },
+                                    profile: function (callback) {
+                                        // Updating profile and inventory to be public
+                                        if (process.env.SKIP_UPDATE_PROFILE_SETTINGS === 'true') {
+                                            return callback(null);
+                                        }
+
+                                        community.profileSettings({
+                                            profile: 3,
+                                            inventory: 3,
+                                            inventoryGifts: false
+                                        }, callback);
                                     }
                                 }, function (err, result) {
                                     if (err) {
